@@ -1,7 +1,8 @@
 package com.xhx.permissionservice.service;
 
-import com.xhx.permissionservice.entity.pojo.Result;
-import org.springframework.stereotype.Service;
+import entiey.pojo.Result;
+
+import java.util.List;
 
 /**
  * @author master
@@ -18,5 +19,8 @@ public interface PermissionService {
 
     // 超管调用：降级用户为普通角色
     Result downgradeToUser(Long userId);
+
+    //根据角色码获取所有拥有该角色的用户ID列表
+    Result getUserIdsByRoleCode(Integer roleCode);
 
 }

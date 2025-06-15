@@ -1,13 +1,15 @@
 package com.xhx.permissionservice.service.Impl;
 
-import com.xhx.permissionservice.entity.pojo.Result;
 import com.xhx.permissionservice.exception.NullRoleException;
 import com.xhx.permissionservice.exception.RoleBoundedException;
 import com.xhx.permissionservice.mapper.PermissionMapper;
 import com.xhx.permissionservice.service.PermissionService;
+import entiey.pojo.Result;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author master
@@ -64,5 +66,11 @@ public class PermissionServiceImpl implements PermissionService {
         }
         permissionMapper.updateUserRole(userId, userRoleId);
         return Result.ok();
+    }
+
+    @Override
+    public Result getUserIdsByRoleCode(Integer roleCode) {
+        List<Long> userIdsByRoleCode = permissionMapper.getUserIdsByRoleCode(roleCode);
+        return Result.ok(userIdsByRoleCode);
     }
 }

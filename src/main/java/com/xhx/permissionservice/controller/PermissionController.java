@@ -1,9 +1,11 @@
 package com.xhx.permissionservice.controller;
 
-import com.xhx.permissionservice.entity.pojo.Result;
 import com.xhx.permissionservice.service.PermissionService;
+import entiey.pojo.Result;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author master
@@ -56,4 +58,14 @@ public class PermissionController {
         return permissionService.downgradeToUser(userId);
     }
 
+    /**
+     * 根据角色码查询拥有该角色的所有用户ID列表
+     * @param roleCode 角色码
+     * @return 返回用户ID列表
+     */
+    @GetMapping("/getUserIdsByRoleCode")
+    public Result getUserIdsByRoleCode(@RequestParam Integer roleCode) {
+        return permissionService.getUserIdsByRoleCode(roleCode);
+    }
 }
+

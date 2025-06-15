@@ -28,6 +28,12 @@
                  JOIN roles r ON ur.role_id = r.role_id
         WHERE ur.user_id = #{userId}
     </select>
+    <!-- 根据role查找用户   -->
+    <select id="getUserIdsByRoleCode" resultType="java.lang.Long">
+        select user_id
+        from user_roles
+        where role_id = #{roleId}
+    </select>
     <!-- 更新权限信息-->
     <update id="updateUserRole">
         UPDATE user_roles SET role_id = #{roleId} WHERE user_id = #{userId}
