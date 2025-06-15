@@ -1,7 +1,7 @@
 package com.xhx.permissionservice.controller;
 
 import com.xhx.permissionservice.service.PermissionService;
-import entiey.pojo.Result;
+import entity.pojo.Result;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 

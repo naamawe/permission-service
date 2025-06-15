@@ -1,6 +1,8 @@
 package com.xhx.permissionservice.service;
 
-import entiey.pojo.Result;
+
+
+import entity.pojo.Result;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package com.xhx.permissionservice.hander;
 
 import com.xhx.permissionservice.exception.NullRoleException;
 import com.xhx.permissionservice.exception.RoleBoundedException;
-import entiey.pojo.Result;
+import entity.pojo.Result;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
