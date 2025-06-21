@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(RuntimeException.class)
-    public Result handleRuntimeException(RuntimeException e) {
-        return Result.fail("服务器异常");
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    public Result handleRuntimeException(RuntimeException e) {
+//        return Result.fail("服务器异常");
+//    }
     @ExceptionHandler(NullRoleException.class)
     public Result handleNullRoleException(NullRoleException e) {
         return Result.fail(e.getMessage());

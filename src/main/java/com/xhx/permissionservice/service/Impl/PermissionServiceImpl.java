@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xhx.permissionservice.constant.Constant.*;
 import static constant.mqConstant.*;
 
 /**
@@ -34,77 +35,95 @@ public class PermissionServiceImpl implements PermissionService {
 
     /**
      * 绑定默认角色
-     *
-     * @param userId
-     * @return
+     * @param userId 用户id
+     * @return       绑定结果
      */
     @Override
     @Transactional
     public Result bindDefaultRole(Long userId) {
 
         if (permissionMapper.countUserRole(userId) > 0) {
-            throw new RoleBoundedException("用户已绑定角色");
+            throw new RoleBoundedException(USER_BIND_ROLE);
         }
 
-        Integer roleId = permissionMapper.getRoleIdByCode("user");
+        Integer roleId = permissionMapper.getRoleIdByCode(USER_ROLE_USER);
         if (roleId == null) {
-            throw new NullRoleException("默认角色 user 不存在");
+            throw new NullRoleException(USER_NOT_EXIST);
         }
 
         permissionMapper.insertUserRole(userId, roleId);
 
-        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),"permission_bind_defaultRole","绑定初始角色");
+        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_BIND_DEFAULT_ROLE,PERMISSION_BIND_DEFAULT_ROLE_SUCCESS);
 
         return Result.ok();
     }
 
+    /**
+     * 获取用户角色
+     * @param userId 用户id
+     * @return       角色码
+     */
     @Override
     public String getUserRoleCode(Long userId) {
         String roleCode = permissionMapper.getRoleCodeByUserId(userId);
-        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),"permission_get_userRole","获取用户权限信息");
+        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_GET_USER_ROLE,PERMISSION_GET_USER_ROLE_SUCCESS);
         return roleCode;
     }
 
+    /**
+     * 提升至管理员
+     * @param userId 用户id
+     * @return       提升结果
+     */
     @Override
     public Result upgradeToAdmin(Long userId) {
-        Integer adminRoleId = permissionMapper.getRoleIdByCode("admin");
+        Integer adminRoleId = permissionMapper.getRoleIdByCode(USER_ROLE_ADMIN);
         if (adminRoleId == null) {
-            throw new NullRoleException("角色admin不存在");
+            throw new NullRoleException(ADMIN_ROLE_NOT_EXIST);
         }
         permissionMapper.updateUserRole(userId, adminRoleId);
 
-        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),"permission_update_userToAdmin","超管调用：升级用户为管理员");
+        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_UPDATE_USER_TO_ADMIN,PERMISSION_UPDATE_USER_TO_ADMIN_SUCCESS);
 
         return Result.ok();
     }
 
+    /**
+     * 降级为普通用户
+     * @param userId 用户id
+     * @return       降级结果
+     */
     @Override
     public Result downgradeToUser(Long userId) {
-        Integer userRoleId = permissionMapper.getRoleIdByCode("user");
+        Integer userRoleId = permissionMapper.getRoleIdByCode(USER_ROLE_USER);
         if (userRoleId == null) {
-            throw new RuntimeException("角色user不存在");
+            throw new RuntimeException(USER_ROLE_NOT_EXIST);
         }
         permissionMapper.updateUserRole(userId, userRoleId);
 
-        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),"permission_update_AdminToUser","超管调用：降级用户为普通角色");
+        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_UPDATE_ADMIN_TO_USER,PERMISSION_UPDATE_ADMIN_TO_USER_SUCCESS);
 
         return Result.ok();
     }
 
+    /**
+     * 根据角色编码获取用户id
+     * @param roleCode 权限信息
+     * @return         用户id
+     */
     @Override
     public Result getUserIdsByRoleCode(Integer roleCode) {
         List<Long> userIdsByRoleCode = permissionMapper.getUserIdsByRoleCode(roleCode);
-        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),"permission_get_userIdsByRoleCode","获取角色用户列表");
+        constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_GET_USERIDS_BY_ROLECODE,PERMISSION_GET_USERIDS_BY_ROLECODE_SUCCESS);
         return Result.ok(userIdsByRoleCode);
     }
 
     /**
      * 构造消息
-     * @param userId
-     * @param ip
-     * @param action
-     * @param message
-     * @return
+     * @param userId  用户id
+     * @param ip      ip
+     * @param action  动作
+     * @param message 消息
      */
     private void constructAndSendMessage(Long userId, String ip, String action, String message){
         OperationLogDTO logDTO = new OperationLogDTO();
@@ -113,7 +132,7 @@ public class PermissionServiceImpl implements PermissionService {
         logDTO.setIp(ip);
         logDTO.setGmtCreate(new Timestamp(System.currentTimeMillis()));
         Map<String, Object> detail = new HashMap<>();
-        detail.put("message",message);
+        detail.put(MESSAGE,message);
         logDTO.setDetail(detail);
 
         try {
@@ -123,7 +142,7 @@ public class PermissionServiceImpl implements PermissionService {
                     logDTO
             );
         } catch (AmqpException e) {
-            throw new MessageException("操作日志发送失败");
+            throw new MessageException(OPERATION_LOG_SEND_FAILED);
         }
     }
 }

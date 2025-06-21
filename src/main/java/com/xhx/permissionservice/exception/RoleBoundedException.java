@@ -6,7 +6,7 @@ package com.xhx.permissionservice.exception;
 public class RoleBoundedException extends RuntimeException {
     /**
      * 角色已绑定异常
-     * @param message
+     * @param message 异常信息
      */
     public RoleBoundedException(String message)
     {
