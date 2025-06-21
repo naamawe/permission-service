@@ -6,6 +6,12 @@ spring:
   cloud:
     nacos:
       server-addr: 192.168.150.129:8848
+    sentinel:
+      eager: true
+      transport:
+        dashboard: 192.168.150.129:8858
+        port: 8719
+      http-method-specify: true
   rabbitmq:
     host: 192.168.150.129
     port: 5672
