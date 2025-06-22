@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.xhx.permissionservice.constant.Constant.*;
 import static constant.mqConstant.*;
@@ -41,7 +42,9 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public Result bindDefaultRole(Long userId) {
-
+        if (userId == null || userId <= 0){
+            throw new MessageException(ERROR_USERID);
+        }
         if (permissionMapper.countUserRole(userId) > 0) {
             throw new RoleBoundedException(USER_BIND_ROLE);
         }
@@ -65,6 +68,9 @@ public class PermissionServiceImpl implements PermissionService {
      */
     @Override
     public String getUserRoleCode(Long userId) {
+        if (userId == null || userId <= 0){
+            throw new MessageException(ERROR_USERID);
+        }
         String roleCode = permissionMapper.getRoleCodeByUserId(userId);
         constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_GET_USER_ROLE,PERMISSION_GET_USER_ROLE_SUCCESS);
         return roleCode;
@@ -77,11 +83,21 @@ public class PermissionServiceImpl implements PermissionService {
      */
     @Override
     public Result upgradeToAdmin(Long userId) {
+        if (userId == null || userId <= 0){
+            throw new MessageException(ERROR_USERID);
+        }
         Integer adminRoleId = permissionMapper.getRoleIdByCode(USER_ROLE_ADMIN);
         if (adminRoleId == null) {
             throw new NullRoleException(ADMIN_ROLE_NOT_EXIST);
         }
-        permissionMapper.updateUserRole(userId, adminRoleId);
+        String code = permissionMapper.getRoleCodeByUserId(userId);
+        if (!code.equals(USER_ROLE_SUPER_ADMIN)) {
+            throw new MessageException(NO_PERMISSION);
+        }
+        int updated = permissionMapper.updateUserRole(userId, adminRoleId);
+        if (updated <= 0) {
+            return Result.fail(PERMISSION_UPDATE_USER_TO_ADMIN_FAILED);
+        }
 
         constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_UPDATE_USER_TO_ADMIN,PERMISSION_UPDATE_USER_TO_ADMIN_SUCCESS);
 
@@ -95,11 +111,22 @@ public class PermissionServiceImpl implements PermissionService {
      */
     @Override
     public Result downgradeToUser(Long userId) {
+        if (userId == null || userId <= 0){
+            throw new MessageException(ERROR_USERID);
+        }
         Integer userRoleId = permissionMapper.getRoleIdByCode(USER_ROLE_USER);
         if (userRoleId == null) {
             throw new RuntimeException(USER_ROLE_NOT_EXIST);
         }
-        permissionMapper.updateUserRole(userId, userRoleId);
+
+        String code = permissionMapper.getRoleCodeByUserId(userId);
+        if (!code.equals(USER_ROLE_USER)) {
+            throw new MessageException(NO_PERMISSION);
+        }
+        int updated = permissionMapper.updateUserRole(userId, userRoleId);
+        if (updated <= 0) {
+            return Result.fail(PERMISSION_DOWNGRADE_USER_TO_USER_FAILED);
+        }
 
         constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_UPDATE_ADMIN_TO_USER,PERMISSION_UPDATE_ADMIN_TO_USER_SUCCESS);
 
@@ -113,6 +140,14 @@ public class PermissionServiceImpl implements PermissionService {
      */
     @Override
     public Result getUserIdsByRoleCode(Integer roleCode) {
+        if (roleCode == null){
+            throw new MessageException(ERROR_CODE);
+        }
+        List<Integer> role = List.of(USER_ROLE_USER_CODE, USER_ROLE_ADMIN_CODE, USER_ROLE_SUPER_ADMIN_CODE);
+        if (!role.contains(roleCode)) {
+            throw new MessageException(ERROR_ROLE_CODE);
+        }
+
         List<Long> userIdsByRoleCode = permissionMapper.getUserIdsByRoleCode(roleCode);
         constructAndSendMessage(UserContext.getUser(), UserContext.getIp(),PERMISSION_GET_USERIDS_BY_ROLECODE,PERMISSION_GET_USERIDS_BY_ROLECODE_SUCCESS);
         return Result.ok(userIdsByRoleCode);

@@ -1,6 +1,7 @@
 package com.xhx.permissionservice.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface PermissionMapper {
 
     String getRoleCodeByUserId(Long userId);
 
-    void updateUserRole(Long userId, Integer adminRoleId);
+    int updateUserRole(@Param("userId") Long userId, @Param("roleId") Integer adminRoleId);
 
-    List<Long> getUserIdsByRoleCode(Integer roleCode);
+    List<Long> getUserIdsByRoleCode(@Param("roleId") Integer roleCode);
 }
